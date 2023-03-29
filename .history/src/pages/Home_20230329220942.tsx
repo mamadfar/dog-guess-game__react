@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useImmerReducer } from "use-immer";
 import { IDogsPics, IInitialState } from "../model/main.model";
 import { generateQuestion, onlyUniqueBreeds } from "../util";
-import {DogPic, Questions} from "./home/components";
+import { BsClockHistory } from "react-icons/bs";
 
 const dogReducer = (draft: typeof initialState, action: any) => {
   switch (action.type) {
@@ -39,19 +39,7 @@ const initialState: IInitialState = {
 };
 
 function Home() {
-  const [
-    {
-      points,
-      strikes,
-      timeRemaining,
-      highScore,
-      bigCollection,
-      currentQuestion,
-      playing,
-      fetchCount,
-    },
-    dispatch,
-  ] = useImmerReducer(dogReducer, initialState);
+  const [state, dispatch] = useImmerReducer(dogReducer, initialState);
 
   const getDogs = async (controller: AbortController) => {
     try {
@@ -72,40 +60,50 @@ function Home() {
 
     //! Clean-up
     return () => controller.abort();
-  }, [fetchCount]);
+  }, [state.fetchCount]);
 
   return (
     <div>
-      {!!currentQuestion && (
-        <Questions
-          points={points}
-          playing={playing}
-          strikes={strikes}
-          timeRemaining={timeRemaining}
-          currentQuestion={currentQuestion}
-        >
-          {currentQuestion.photos.map((photo, index) => (
-            <DogPic
-              key={index}
-              index={index}
-              guessHandler={() =>
-                dispatch({ type: "GUESS_ATTEMPT", value: index })
-              }
-              photo={photo}
-            />
-          ))}
-        </Questions>
+      {!!state.currentQuestion && (
+        <>
+          <p className="text-center">
+            <span className="text-zinc-400 mr-3">
+              <BsClockHistory className={`inline-block w-8 h-8 ${state.playing ? "animate-spin" : ""}`}/>
+            </span>
+          </p>
+          <h1 className="text-center font-bold pt-3 pb-10 break-all text-4xl md:text-7xl">
+            {state.currentQuestion.breed}
+          </h1>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 px-5">
+            {state.currentQuestion.photos.map((photo, index) => (
+              <div
+                key={index}
+                onClick={() =>
+                  dispatch({ type: "GUESS_ATTEMPT", value: index })
+                }
+              >
+                <img
+                  className="object-cover h-40 lg:h-80 w-full shadow-md rounded-lg"
+                  src={photo}
+                  alt={photo.split("/")[4]}
+                />
+              </div>
+            ))}
+          </div>
+        </>
       )}
-      {!playing && bigCollection.length && !currentQuestion && (
-        <div className="grid h-screen place-items-center">
-          <button
-            onClick={() => dispatch({ type: "START_PLAYING" })}
-            className="text-white bg-gradient-to-b from-indigo-500 to-indigo-600 px-4 py-3 rounded text-2xl font-bold"
-          >
-            Play
-          </button>
-        </div>
-      )}
+      {!state.playing &&
+        state.bigCollection.length &&
+        !state.currentQuestion && (
+          <div className="grid h-screen place-items-center">
+            <button
+              onClick={() => dispatch({ type: "START_PLAYING" })}
+              className="text-white bg-gradient-to-b from-indigo-500 to-indigo-600 px-4 py-3 rounded text-2xl font-bold"
+            >
+              Play
+            </button>
+          </div>
+        )}
     </div>
   );
 }

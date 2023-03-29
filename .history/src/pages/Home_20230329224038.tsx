@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useImmerReducer } from "use-immer";
 import { IDogsPics, IInitialState } from "../model/main.model";
 import { generateQuestion, onlyUniqueBreeds } from "../util";
-import {DogPic, Questions} from "./home/components";
+import DogPic from "./home/components/DogPic";
+import Questions from "./home/components/Questions";
 
 const dogReducer = (draft: typeof initialState, action: any) => {
   switch (action.type) {
