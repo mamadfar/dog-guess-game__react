@@ -38,7 +38,6 @@ const dogReducer = (draft: typeof initialState, action: any) => {
       break;
     case "RECEIVE_HIGH_SCORE":
       draft.highScore = action.value;
-      if (!action.value) draft.highScore = 0;
       break;
   }
 };

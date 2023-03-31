@@ -6,7 +6,8 @@ import { DogPic, Questions } from "./home/components";
 import { Button, StarIcon } from "../components";
 
 const dogReducer = (draft: typeof initialState, action: any) => {
-  if (draft.points > draft.highScore) draft.highScore = draft.points;
+
+  if(draft.points > draft.highScore) draft.highScore = draft.points;
 
   switch (action.type) {
     case "ADD_TO_COLLECTION":
@@ -29,16 +30,12 @@ const dogReducer = (draft: typeof initialState, action: any) => {
         if (draft.strikes >= 3) draft.playing = false;
       }
       break;
-    case "DECREASE_TIME":
-      if (draft.timeRemaining <= 0) {
-        draft.playing = false;
-      } else {
-        draft.timeRemaining--;
-      }
-      break;
-    case "RECEIVE_HIGH_SCORE":
-      draft.highScore = action.value;
-      if (!action.value) draft.highScore = 0;
+      case "DECREASE_TIME":
+        if(draft.timeRemaining <= 0) {
+          draft.playing = false;
+        } else {
+          draft.timeRemaining--;
+        }
       break;
   }
 };
@@ -84,37 +81,34 @@ function Home() {
   };
 
   useEffect(() => {
-    dispatch({
-      type: "RECEIVE_HIGH_SCORE",
-      value: localStorage.getItem("highscore"),
-    });
+    dispatch({type: "RECEIVE_HIGH_SCORE", value: localStorage.getItem("highscore")});
   }, []);
 
   useEffect(() => {
-    if (highScore > 0) {
+    if(highScore > 0) {
       localStorage.setItem("highscore", highScore.toString());
     }
   }, [highScore]);
 
   useEffect(() => {
-    if (bigCollection.length) {
-      bigCollection.slice(0, 8).forEach((pic) => {
+    if(bigCollection.length) {
+      bigCollection.slice(0, 8).forEach(pic => {
         new Image().src = pic;
-      });
+      })
     }
   }, [bigCollection]);
 
   useEffect(() => {
-    if (playing) {
+    if(playing) {
       timer.current = setInterval(() => {
-        dispatch({ type: "DECREASE_TIME" });
+        dispatch({type: "DECREASE_TIME"})
       }, 1000);
 
       return () => {
         clearInterval(timer.current);
-      };
+      }
     }
-  }, [playing]);
+  }, [playing])
 
   useEffect(() => {
     const controller = new AbortController();
@@ -165,7 +159,7 @@ function Home() {
             )}
             <div className="flex justify-center">
               <span>Your score:&nbsp;</span>
-              <StarIcon className="text-amber-400 h-5 w-5 mx-1" />
+                <StarIcon className="text-amber-400 h-5 w-5 mx-1"/>
               <span>{points}</span>
             </div>
             <p className="mb-5">Your all-time high score: {highScore}</p>

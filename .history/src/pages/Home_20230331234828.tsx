@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useImmerReducer } from "use-immer";
 import { IDogsPics, IInitialState } from "../model/main.model";
 import { generateQuestion, onlyUniqueBreeds } from "../util";
@@ -6,8 +6,6 @@ import { DogPic, Questions } from "./home/components";
 import { Button, StarIcon } from "../components";
 
 const dogReducer = (draft: typeof initialState, action: any) => {
-  if (draft.points > draft.highScore) draft.highScore = draft.points;
-
   switch (action.type) {
     case "ADD_TO_COLLECTION":
       draft.bigCollection = draft.bigCollection.concat(action.value);
@@ -29,17 +27,6 @@ const dogReducer = (draft: typeof initialState, action: any) => {
         if (draft.strikes >= 3) draft.playing = false;
       }
       break;
-    case "DECREASE_TIME":
-      if (draft.timeRemaining <= 0) {
-        draft.playing = false;
-      } else {
-        draft.timeRemaining--;
-      }
-      break;
-    case "RECEIVE_HIGH_SCORE":
-      draft.highScore = action.value;
-      if (!action.value) draft.highScore = 0;
-      break;
   }
 };
 
@@ -55,7 +42,6 @@ const initialState: IInitialState = {
 };
 
 function Home() {
-  const timer = useRef<any>(null);
   const [
     {
       points,
@@ -82,39 +68,6 @@ function Home() {
       console.log(error);
     }
   };
-
-  useEffect(() => {
-    dispatch({
-      type: "RECEIVE_HIGH_SCORE",
-      value: localStorage.getItem("highscore"),
-    });
-  }, []);
-
-  useEffect(() => {
-    if (highScore > 0) {
-      localStorage.setItem("highscore", highScore.toString());
-    }
-  }, [highScore]);
-
-  useEffect(() => {
-    if (bigCollection.length) {
-      bigCollection.slice(0, 8).forEach((pic) => {
-        new Image().src = pic;
-      });
-    }
-  }, [bigCollection]);
-
-  useEffect(() => {
-    if (playing) {
-      timer.current = setInterval(() => {
-        dispatch({ type: "DECREASE_TIME" });
-      }, 1000);
-
-      return () => {
-        clearInterval(timer.current);
-      };
-    }
-  }, [playing]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -163,12 +116,14 @@ function Home() {
             {strikes >= 3 && (
               <p className="text-6xl mb-4 font-bold">3 Strinkes; You're Out!</p>
             )}
-            <div className="flex justify-center">
-              <span>Your score:&nbsp;</span>
-              <StarIcon className="text-amber-400 h-5 w-5 mx-1" />
-              <span>{points}</span>
-            </div>
-            <p className="mb-5">Your all-time high score: {highScore}</p>
+            <p>
+              Your score:&nbsp;
+              <span className="text-amber-400">
+                <StarIcon />
+                {points}
+              </span>
+            </p>
+            <p className="mb-5">Your alltime high score: 0</p>
             <Button
               title="Play again"
               className="text-lg"
